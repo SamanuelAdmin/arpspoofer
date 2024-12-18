@@ -74,7 +74,7 @@ def scanNetwork(mask: str, scanTimes: int=5) -> dict:
                     print(Fore.GREEN + f'{cl.answer.psrc} with mac {cl.answer.hwsrc} found in network')
 
                 networkScan[cl.answer.psrc] = cl.answer.hwsrc
-            print(Fore.YELLOW + f'{datetime.now()}   [{_}/{scanTimes}] Scanning... ', end='\r')
+            print(Fore.YELLOW + f'{datetime.now()}   [{_ + 1}/{scanTimes}] Scanning... ', end='\r')
 
         except KeyboardInterrupt: break
 
@@ -97,12 +97,13 @@ def main():
     networkMask = '.'.join(myIp.split('.')[:-1]) + '.0/24'
     myMac = getMyMac()
 
-    print(f'Machine info: \n IP: {myIp} \n MAC: {myMac} \n Interface: {sys.argv[1]}')
+    print(f'Machine info: \n IP: {myIp} \n MAC: {myMac} \n Interface: {sys.argv[1]}\n\n')
 
 
     # scanning network for hosts (arp -a command)
     networkScan = scanNetwork(networkMask, scanTimes=networkScanTimesCount)
 
+    print(networkScan)
     print(f'\n{datetime.now()}   Found devices: ')
     for host, mac in networkScan:
         print(host, '  ', mac)
