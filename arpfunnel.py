@@ -62,7 +62,11 @@ def main():
 
     print(f'Machine IP: {myIp}  MAC: {myMac}')
 
-    networkScan = scan(myIp)
+    networkScan = {}
+    for _ in range(20):
+        for cl in scan(myIp):
+            networkScan[cl.answer.psrc] = cl.answer.hwsrc
+        print(f'[{_}] Scan ')
 
     for host, mac in networkScan:
         print(host, '  ', mac)
