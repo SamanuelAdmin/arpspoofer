@@ -60,8 +60,10 @@ def main():
         sys.exit(1)
 
     myMac = getMyMac()
+    networkMask = '.'.join(myIp.split('.')[:-1]) + '.0/24'
 
     print(f'Machine IP: {myIp}  MAC: {myMac}')
+    print(f'interface: {sys.argv[1]}')
 
     # scanning network for hosts (arp -a command)
     try:
@@ -79,7 +81,6 @@ def main():
     for host, mac in networkScan:
         print(host, '  ', mac)
 
-    print(f'interface: {sys.argv[1]}\nIp: {myIp}')
     input('Press Enter to start funnel.')
 
     #  starting atack
