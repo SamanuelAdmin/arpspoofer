@@ -108,7 +108,6 @@ def main():
         print(host, '  ', mac)
 
 
-
     #  starting attack
     input('\n\nPress Enter to start funnel.')
 
