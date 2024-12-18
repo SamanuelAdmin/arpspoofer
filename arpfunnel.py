@@ -138,7 +138,7 @@ def main():
 
 
     USER_INPUT = input('Choose router (destination device) details (ip/mac) [default=0]: ')
-    routerIp = list(networkScan.keys())[USER_INPUT if USER_INPUT != '' else 0]
+    routerIp = list(networkScan.keys())[int(USER_INPUT) if USER_INPUT != '' else 0]
     routerMac = networkScan[routerIp]
 
     #  starting attack
