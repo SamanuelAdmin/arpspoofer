@@ -70,7 +70,7 @@ def main():
         networkScan = {}
 
         for _ in range(20):
-            for cl in scan(myIp):
+            for cl in scan(networkMask):
                 if cl.answer.psrc not in networkScan:
                     print(f'{cl.answer.psrc} with mac {cl.answer.hwsrc} found in network')
 
