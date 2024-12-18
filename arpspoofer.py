@@ -54,7 +54,7 @@ def main():
 			sendPackage(createARPpackage(routerIp, myMac, clientIP), 'ff:ff:ff:ff:ff:ff')
 
 			sendedPackCount += 2
-			print(f'[{sendedPackCount}] sended package'),
+			print(f'[{sendedPackCount}] sent package'),
 
 			time.sleep(1)
 		except KeyboardInterrupt:
