@@ -6,6 +6,12 @@ import sys
 import uuid
 import time
 
+from colorama import init
+init(autoreset=True)
+from colorama import Fore
+from colorama import just_fix_windows_console
+just_fix_windows_console()
+
 
 
 # package functions
@@ -57,17 +63,18 @@ def scan(ip):
 
     return scapy.srp(arpPush, timeout=10, verbose=False)[0]
 
-def scanNetwork(mask: str, networkScanCCount: int=5):
+
+def scanNetwork(mask: str, scanTimes: int=5) -> dict:
     networkScan = {}
 
-    for _ in range(networkScanCCount):
+    for _ in range(scanTimes):
         try:
             for cl in scan(mask):
                 if cl.answer.psrc not in networkScan:
-                    print(f'{cl.answer.psrc} with mac {cl.answer.hwsrc} found in network')
+                    print(Fore.GREEN + f'{cl.answer.psrc} with mac {cl.answer.hwsrc} found in network')
 
                 networkScan[cl.answer.psrc] = cl.answer.hwsrc
-            print(f'{datetime.now()}   [{_}/{networkScanCCount}] Scanning... ', end='\r')
+            print(Fore.YELLOW + f'{datetime.now()}   [{_}/{scanTimes}] Scanning... ', end='\r')
 
         except KeyboardInterrupt: break
 
@@ -78,33 +85,32 @@ def scanNetwork(mask: str, networkScanCCount: int=5):
 
 def main():
     # CONFIGS
-    networkScanCCount = 5 # how many times am i need to scan local network for devices
+    networkScanTimesCount = 5 # how many times am i need to scan local network for devices
 
 
     # finding current machine info
     myIp = getLocalIpByInterface(sys.argv[1])
     if myIp is None:
-        print('Cannot recognize local ip')
+        print(Fore.RED + 'Cannot recognize local ip')
         sys.exit(1)
 
     networkMask = '.'.join(myIp.split('.')[:-1]) + '.0/24'
     myMac = getMyMac()
 
-    print(f'Machine IP: {myIp}  MAC: {myMac}')
-    print(f'interface: {sys.argv[1]}')
+    print(f'Machine info: \n IP: {myIp} \n MAC: {myMac} \n Interface: {sys.argv[1]}')
 
 
     # scanning network for hosts (arp -a command)
-    networkScan = scanNetwork(networkMask, networkScanCCount=networkScanCCount)
+    networkScan = scanNetwork(networkMask, scanTimes=networkScanTimesCount)
 
-    print(f'{datetime.now()}   Found devices: ')
+    print(f'\n{datetime.now()}   Found devices: ')
     for host, mac in networkScan:
         print(host, '  ', mac)
 
 
 
-    #  starting atack
-    input('Press Enter to start funnel.')
+    #  starting attack
+    input('\n\nPress Enter to start funnel.')
 
     sentPackCount = 0
 
