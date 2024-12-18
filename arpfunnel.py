@@ -105,8 +105,8 @@ def main():
 
     print(networkScan)
     print(f'\n{datetime.now()}   Found devices: ')
-    for host, mac in networkScan:
-        print(host, '  ', mac)
+    for host in networkScan:
+        print(host, '  ', networkScan[host])
 
 
     #  starting attack
