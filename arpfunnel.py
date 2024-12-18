@@ -53,6 +53,7 @@ def get_ip_by_interface(interface_name):
 
 
 def main():
+    # finding current machine info
     myIp = get_ip_by_interface(sys.argv[1])
     if myIp is None:
         print('Cannot recognize local ip')
@@ -62,11 +63,18 @@ def main():
 
     print(f'Machine IP: {myIp}  MAC: {myMac}')
 
-    networkScan = {}
-    for _ in range(20):
-        for cl in scan(myIp):
-            networkScan[cl.answer.psrc] = cl.answer.hwsrc
-        print(f'[{_}] Scan ')
+    # scanning network for hosts (arp -a command)
+    try:
+        networkScan = {}
+
+        for _ in range(20):
+            for cl in scan(myIp):
+                if cl.answer.psrc not in networkScan:
+                    print(f'{cl.answer.psrc} with mac {cl.answer.hwsrc} found in network')
+
+                networkScan[cl.answer.psrc] = cl.answer.hwsrc
+            print(f'[{_}] Scan ')
+    except KeyboardInterrupt: pass
 
     for host, mac in networkScan:
         print(host, '  ', mac)
@@ -74,7 +82,7 @@ def main():
     print(f'interface: {sys.argv[1]}\nIp: {myIp}')
     input('Press Enter to start funnel.')
 
-
+    #  starting atack
     sentPackCount = 0
 
     while True:
