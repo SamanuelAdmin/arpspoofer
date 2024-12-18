@@ -66,9 +66,9 @@ def main():
     print(f'interface: {sys.argv[1]}')
 
     # scanning network for hosts (arp -a command)
-    try:
-        networkScan = {}
+    networkScan = {}
 
+    try:
         for _ in range(20):
             for cl in scan(networkMask):
                 if cl.answer.psrc not in networkScan:
@@ -78,6 +78,7 @@ def main():
             print(f'[{_}] Scan ')
     except KeyboardInterrupt: pass
 
+    print(networkScan)
     for host, mac in networkScan:
         print(host, '  ', mac)
 
