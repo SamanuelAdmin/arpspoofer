@@ -62,7 +62,7 @@ def scanNetwork(mask: str, networkScanCCount: int=5):
 
     for _ in range(networkScanCCount):
         try:
-            for cl in scan(networkMask):
+            for cl in scan(mask):
                 if cl.answer.psrc not in networkScan:
                     print(f'{cl.answer.psrc} with mac {cl.answer.hwsrc} found in network')
 
