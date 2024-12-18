@@ -132,7 +132,7 @@ def main():
 
     print(networkScan)
     print(f'\n{datetime.now()}   Found devices: ')
-    for keyId in range(list(networkScan.keys())):
+    for keyId in range(len(list(networkScan.keys()))):
         host = list(networkScan.keys())[keyId]
         print(keyId, '  ', host, '  ', networkScan[host])
 
