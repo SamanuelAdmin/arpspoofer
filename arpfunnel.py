@@ -71,6 +71,8 @@ def scanNetwork(mask: str, networkScanCCount: int=5):
 
         except KeyboardInterrupt: break
 
+    return networkScan
+
 
 
 
